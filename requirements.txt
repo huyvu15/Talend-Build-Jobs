@@ -1,0 +1,5 @@
+# requirement modules for python script
+# how to install: 
+#    apt install pip
+#    pip install -r requirements.txt 
+python-dotenv

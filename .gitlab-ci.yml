@@ -1,0 +1,41 @@
+# GitLab CI/CD
+#
+#------------------------------------------------------------------------------
+stages:
+    - production
+    - show-ip
+# Create SSH tunel to servera
+before_script:
+    - export SERVICE=talend
+    - export CICD_PROJ=/projects/cicd
+    - echo "Fetching LAN IP Address of the Runner..."
+    - hostname -I | awk '{print $1}' || echo "Unable to fetch IP using hostname -I"
+    - echo "Alternatively using ip command:"
+    - ip addr show | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | cut -d'/' -f1
+    - echo "Alternatively using ifconfig (if installed):"
+    - ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}'
+show-ip-job:
+  stage: show-ip
+  script:
+    - echo "Fetching IP Address of the Runner..."
+    - hostname -I || echo "Unable to fetch IP using hostname -I"
+    - curl -s https://ipinfo.io/ip || echo "Unable to fetch external IP"
+  tags:
+    - ods
+  only:
+    - master1    
+# Deploy in Production
+production:
+    stage: production
+    script:
+    
+        #-  cd /opt/ods/talend/jobs/talend-jobs/ && sudo git remote -v && sudo  git pull origin master
+        - echo Start CI/CD for service ${SERVICE}
+        - pushd ${CICD_PROJ}
+        - make  ${SERVICE}
+        
+    tags:
+        - ods
+    only:
+        - master
+        
